@@ -1,14 +1,20 @@
-/*
- * ADXRS290.c
- *
- *  Created on: 2 θών. 2019 γ.
- *      Author: Petrov
- */
+/**
+  ******************************************************************************
+  * @file           ADXRS290.c
+  * @brief          ADXRS290 driver
+  ******************************************************************************
+*/
 
+/***************************** Include Files **********************************/
 #include "spi_communication.h"
 #include "ADXRS290.h"
 #include "stdbool.h"
 
+/****************************** Global Data ***********************************/
+
+/**
+   @brief Schematic spi chip select
+**/
 CSPinDesc_t ADXRS290_CS_pins[ADXRS290_COUNT] =
 {
 	{0 ,GPIOD, GPIO_PIN_14},
@@ -17,6 +23,15 @@ CSPinDesc_t ADXRS290_CS_pins[ADXRS290_COUNT] =
 	{0, GPIOB, GPIO_PIN_8},
 };
 
+/************************* Global scope functions *****************************/
+
+/**
+   @brief Schematic selector routine
+
+   @param number A number (see schematic)
+
+   @param select Select A or not
+**/
 void selectA(uint16_t number, bool select)
 {
 	if (select == true)
@@ -25,6 +40,12 @@ void selectA(uint16_t number, bool select)
 		GPIOD->BSRR = (uint32_t)number << 16;
 }
 
+/**
+   @brief Initialization the gyro sensor
+
+   @return none
+
+**/
 void ADXRS290_Init(void)
 {
 	uint8_t memsid;
@@ -51,6 +72,16 @@ void ADXRS290_Init(void)
 	}
 }
 
+/**
+   @brief Reads the gyro data.
+
+   @param self Data structure
+
+   @param count Devices count
+
+   @return none
+
+**/
 void ADXRS290_Data_Scan(ADXRS290Device *self, uint8_t count)
 {
 	uint8_t buffer[4];

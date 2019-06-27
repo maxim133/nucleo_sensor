@@ -1,9 +1,17 @@
+/**
+  ******************************************************************************
+  * @file           : ADXL355.h
+  * @brief          : ADXL355 driver
+  ******************************************************************************
+  */
+
 #ifndef ADXL355_H_
 #define ADXL355_H_
 
 /********************************* Definitions ********************************/
 #include "pin_desc_t.h"
 
+/* Count of ADXL355 sensors */
 #define ADXL355_COUNT			20
 
 /* ADXL355 registers addresses */
@@ -67,6 +75,7 @@
 
 #define INACT_TIMER        10     /* Inactivity timer value in seconds */
 
+/* Device data */
 typedef struct
 {
 	uint32_t X;
@@ -76,20 +85,6 @@ typedef struct
 } ADXL355Device;
 
 extern ADXL355Device ADXL355Sensor[ADXL355_COUNT];
-
-/****************************** Global Data ***********************************/
-
-extern volatile int32_t i32SensorX;
-extern volatile int32_t i32SensorY;
-extern volatile int32_t i32SensorZ;
-
-extern volatile uint32_t ui32SensorX;
-extern volatile uint32_t ui32SensorY;
-extern volatile uint32_t ui32SensorZ;
-extern volatile uint32_t ui32SensorT;
-
-extern volatile uint32_t ui32timer_counter;
-
 
 /*************************** Functions prototypes *****************************/
 

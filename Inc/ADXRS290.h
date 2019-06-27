@@ -1,17 +1,18 @@
-/*
- * ADXRS290.h
- *
- *  Created on: 2 θών. 2019 γ.
- *      Author: Petrov
- */
-
 #ifndef ADXRS290_H_
 #define ADXRS290_H_
 
+/**
+  ******************************************************************************
+  * @file           ADXRS290.h
+  * @brief          ADXRS290 driver definitions
+  ******************************************************************************
+*/
+
 #define ADXRS290_COUNT				4
+/*Schematic selector count*/
 #define ADXRS290_A_COUNT			5
 
-/* Gyroscope */
+/* ADXRS290 registers addresses */
 #define ADXRS290_ANALOG_ID        0x00
 #define ADXRS290_ANALOG_ID_RETURN 0xAD
 
@@ -98,6 +99,7 @@
 #define ADXRS_HPF_2_800_HZ        0x09   //  2.800_Hz
 #define ADXRS_HPF_11_30_HZ 0x0A // 11.300_Hz
 
+/* Device data */
 typedef struct
 {
 	uint32_t X;

@@ -1,3 +1,10 @@
+/**
+  ******************************************************************************
+  * @file           ADXL355.c
+  * @brief          ADXL355 driver
+  ******************************************************************************
+  */
+
 /***************************** Include Files **********************************/
 #include <stdio.h>
 
@@ -6,6 +13,9 @@
 
 /****************************** Global Data ***********************************/
 
+/**
+   @brief Schematic spi chip select
+**/
 CSPinDesc_t ADXL355_CS_pins [ADXL355_COUNT] =
 {
 	{0, GPIOA, GPIO_PIN_4},
@@ -30,8 +40,6 @@ CSPinDesc_t ADXL355_CS_pins [ADXL355_COUNT] =
 	{0, GPIOG, GPIO_PIN_12},
 };
 
-static float adxl355Scale = 0.0f;
-
 /************************* Global scope functions *****************************/
 /**
    @brief Turns on accelerometer measurement mode.
@@ -53,12 +61,18 @@ void ADXL355_Start_Sensor(void)
 	}
 }
 
-void ADXL355_Reset(void)
+/**
+   @brief Reset the accelerometer sensor
+
+   @param cs Chip select number
+
+   @return none
+
+**/
+void ADXL355_Reset(CSPinDesc_t *cs)
 {
-	for (int channel = 0; channel < ADXL355_COUNT; channel++)
-	{
-		SPI_WriteData(ADXL355, &ADXL355_CS_pins[channel], RESET_G, POR_RESET);
-	}
+	SPI_WriteData(ADXL355, cs, RESET_G, POR_RESET);
+	HAL_Delay(10UL);
 }
 
 /**
@@ -76,27 +90,23 @@ void ADXL355_Init(void)
 		ADXL355_CS_pins[channel].spi_channel = &hspi3;
 	}
 
-	ADXL355_Reset();
-	HAL_Delay(100UL);
-
    /* Quick verification test for boards */
 	for (int channel = 0; channel < ADXL355_COUNT; channel++)
 	{
+		ADXL355_Reset(&ADXL355_CS_pins[channel]);
+
 		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], DEVID_AD, &devid, 1);
 
 #if ADXL_RANGE == 2
 		SPI_WriteData(ADXL355, &ADXL355_CS_pins[channel],  RANGE, 0x81);          /* Set sensor range within RANGE register */
-		adxl355Scale = 256000.0f;
 #endif
 
 #if ADXL_RANGE == 4
 		SPI_WriteData(ADXL355, ADXL355_CS_pins[channel],  RANGE, 0x82);          /* Set sensor range within RANGE register */
-		adxl355Scale = 128000.0f;
 #endif
 
 #if ADXL_RANGE == 8
 		SPI_WriteData(ADXL355, ADXL355_CS_pins[channel],  RANGE, 0x83);          /* Set sensor range within RANGE register */
-		adxl355Scale = 64000.0f;
 #endif
 	}
 
@@ -153,6 +163,10 @@ int32_t ADXL355_Acceleration_Data_Conversion (uint32_t ui32SensorData)
 /**
    @brief Reads the accelerometer data.
 
+   @param self Data structure
+
+   @param count Devices count
+
    @return none
 
 **/
@@ -171,6 +185,7 @@ void ADXL355_Data_Scan(ADXL355Device *self, uint8_t count)
 		SPI_ReadData(ADXL355, &ADXL355_CS_pins[0], TEMP2, buffer, 2);
 		self[channel].T = ((buffer[0] << 8) | buffer[1]);
 
-		float temp = ((((float)self[channel].T - ADXL355_TEMP_BIAS)) / ADXL355_TEMP_SLOPE) + 25.0;
+		// for debug
+//		float temp = ((((float)self[channel].T - ADXL355_TEMP_BIAS)) / ADXL355_TEMP_SLOPE) + 25.0;
 	}
 }
