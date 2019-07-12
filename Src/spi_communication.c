@@ -8,9 +8,9 @@
 #include "stm32f7xx_hal.h"
 #include "spi_communication.h"
 
-void ChipSelect(CSPinDesc_t *cs)
+void ChipSelect(CSPinDesc_t *cs, GPIO_PinState PinState)
 {
-	HAL_GPIO_TogglePin(cs->cs_gpio, cs->cs_pin);
+	HAL_GPIO_WritePin(cs->cs_gpio, cs->cs_pin, PinState);
 }
 
 void SPI_WriteData(Channel ch, CSPinDesc_t *cs, uint8_t ui8address, uint8_t ui8Data)
@@ -26,12 +26,12 @@ void SPI_WriteData(Channel ch, CSPinDesc_t *cs, uint8_t ui8address, uint8_t ui8D
 		ui8writeAddress = ui8address | (SPI_WRITE << 7);
 	}
 
-	ChipSelect(cs);
+	ChipSelect(cs, GPIO_PIN_RESET);
 
-	HAL_SPI_Transmit(cs->spi_channel, &ui8writeAddress, 1, 1);
-	HAL_SPI_Transmit(cs->spi_channel, &ui8Data, 1, 1);
+	HAL_SPI_Transmit(cs->spi_channel, &ui8writeAddress, 1, 3);
+	HAL_SPI_Transmit(cs->spi_channel, &ui8Data, 1, 3);
 
-	ChipSelect(cs);
+	ChipSelect(cs, GPIO_PIN_SET);
 }
 
 void SPI_ReadData(Channel ch, CSPinDesc_t *cs, uint8_t ui8address, uint8_t *buffer, uint8_t size)
@@ -48,11 +48,11 @@ void SPI_ReadData(Channel ch, CSPinDesc_t *cs, uint8_t ui8address, uint8_t *buff
 		ui8writeAddress = ui8address | (SPI_READ << 7);
 	}
 
-	ChipSelect(cs);
+	ChipSelect(cs, GPIO_PIN_RESET);
 
-	HAL_SPI_Transmit(cs->spi_channel, &ui8writeAddress, 1, 1);
+	HAL_SPI_Transmit(cs->spi_channel, &ui8writeAddress, 1, 3);
 
-	HAL_SPI_TransmitReceive(cs->spi_channel, &DummyBite, buffer, size, 2);
+	HAL_SPI_TransmitReceive(cs->spi_channel, &DummyBite, buffer, size, 3);
 
-	ChipSelect(cs);
+	ChipSelect(cs, GPIO_PIN_SET);
 }

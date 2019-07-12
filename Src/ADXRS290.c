@@ -48,28 +48,30 @@ void selectA(uint16_t number, bool select)
 **/
 void ADXRS290_Init(void)
 {
-	uint8_t memsid;
+	uint8_t devid;
 
-	ADXRS290_CS_pins[0].spi_channel = &hspi4;
+	ADXRS290_CS_pins[0].spi_channel = &hspi1;
 	ADXRS290_CS_pins[1].spi_channel = &hspi1;
-	ADXRS290_CS_pins[2].spi_channel = &hspi1;
-	ADXRS290_CS_pins[3].spi_channel = &hspi4;
+	ADXRS290_CS_pins[2].spi_channel = &hspi4;
+	ADXRS290_CS_pins[3].spi_channel = &hspi1;
 
 	for (int channel = 0; channel < ADXRS290_COUNT; channel++)
 	{
 		for (int A = 0; A < ADXRS290_A_COUNT; A++)
 		{
 			selectA(A, true);
-			SPI_ReadData(ADXRS290, &ADXRS290_CS_pins[channel], ADXRS290_DEV_ID, &memsid, 1);
+			SPI_ReadData(ADXRS290, &ADXRS290_CS_pins[channel], ADXRS290_DEV_ID, &devid, 1);
+
+			if (devid != 0x92)
+				HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
 			/*Set measurement mode. Temperature sensor is enable*/
 			SPI_WriteData(ADXRS290, &ADXRS290_CS_pins[channel], ADXRS290_POW_CTRL_REG, ADXRS290_POW_CTRL_STDBY_MASK);
-
-			SPI_ReadData(ADXRS290, &ADXRS290_CS_pins[channel], ADXRS290_POW_CTRL_REG, &memsid, 1);
-
+			SPI_ReadData(ADXRS290, &ADXRS290_CS_pins[channel], ADXRS290_POW_CTRL_REG, &devid, 1);
 			selectA(A, false);
 		}
 	}
+
 }
 
 /**
@@ -115,10 +117,6 @@ void ADXRS290_Data_Scan(ADXRS290Device *self, uint8_t count)
 			i16y = (int16_t)data;
 
 			self[index].Y = data;
-
-			float T = ((float)temp)/10.0;
-			float x  = (float) i16x / 200.0; // sensitivity 1/200 per LSB
-			float y = (float) i16y / 200.0;
 		}
 	}
 }

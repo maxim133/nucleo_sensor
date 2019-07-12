@@ -19,7 +19,7 @@
 CSPinDesc_t ADXL355_CS_pins [ADXL355_COUNT] =
 {
 	{0, GPIOA, GPIO_PIN_4},
-	{0, GPIOC, GPIO_PIN_10},
+	{0, GPIOA, GPIO_PIN_0},
 	{0, GPIOC, GPIO_PIN_11},
 	{0, GPIOC, GPIO_PIN_12},
 	{0, GPIOF, GPIO_PIN_6},
@@ -58,6 +58,7 @@ void ADXL355_Start_Sensor(void)
 		ui8temp = ui8temp & 0xFE;                                          /* Set measurement bit in POWER_CTL register */
 
 		SPI_WriteData(ADXL355, &ADXL355_CS_pins[channel], POWER_CTL, ui8temp);                    /* Write the new value to POWER_CTL register */
+		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], POWER_CTL, &ui8temp, 1);
 	}
 }
 
@@ -96,6 +97,9 @@ void ADXL355_Init(void)
 		ADXL355_Reset(&ADXL355_CS_pins[channel]);
 
 		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], DEVID_AD, &devid, 1);
+
+		if (devid != 0xAD)
+			HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
 
 #if ADXL_RANGE == 2
 		SPI_WriteData(ADXL355, &ADXL355_CS_pins[channel],  RANGE, 0x81);          /* Set sensor range within RANGE register */
@@ -170,22 +174,20 @@ int32_t ADXL355_Acceleration_Data_Conversion (uint32_t ui32SensorData)
    @return none
 
 **/
+
 void ADXL355_Data_Scan(ADXL355Device *self, uint8_t count)
 {
 	uint8_t buffer[3];
 
 	for (uint8_t channel = 0; channel < count; channel++)
 	{
-		SPI_ReadData(ADXL355, &ADXL355_CS_pins[0], XDATA3, buffer, 3);
+		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], XDATA3, buffer, 3);
 		self[channel].X = ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2]);
-		SPI_ReadData(ADXL355, &ADXL355_CS_pins[0], YDATA3, buffer, 3);
+		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], YDATA3, buffer, 3);
 		self[channel].Y = ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2]);
-		SPI_ReadData(ADXL355, &ADXL355_CS_pins[0], ZDATA3, buffer, 3);
+		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], ZDATA3, buffer, 3);
 		self[channel].Z = ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2]);
-		SPI_ReadData(ADXL355, &ADXL355_CS_pins[0], TEMP2, buffer, 2);
+		SPI_ReadData(ADXL355, &ADXL355_CS_pins[channel], TEMP2, buffer, 2);
 		self[channel].T = ((buffer[0] << 8) | buffer[1]);
-
-		// for debug
-//		float temp = ((((float)self[channel].T - ADXL355_TEMP_BIAS)) / ADXL355_TEMP_SLOPE) + 25.0;
 	}
 }
