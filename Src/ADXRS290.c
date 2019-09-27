@@ -17,10 +17,10 @@
 **/
 CSPinDesc_t ADXRS290_CS_pins[ADXRS290_COUNT] =
 {
-	{0 ,GPIOD, GPIO_PIN_14},
-	{0, GPIOC, GPIO_PIN_6},
-	{0, GPIOB, GPIO_PIN_15},
-	{0, GPIOB, GPIO_PIN_8},
+	{0 ,GPIOA, ADXRS290_CS0_Pin},
+	{0, GPIOC, ADXRS290_CS1_Pin},
+	{0, GPIOD, ADXRS290_CS2_Pin},
+	{0, GPIOE, ADXRS290_CS3_Pin},
 };
 
 /************************* Global scope functions *****************************/
@@ -50,10 +50,10 @@ void ADXRS290_Init(void)
 {
 	uint8_t devid;
 
-	ADXRS290_CS_pins[0].spi_channel = &hspi1;
-	ADXRS290_CS_pins[1].spi_channel = &hspi1;
+	ADXRS290_CS_pins[0].spi_channel = &hspi4;
+	ADXRS290_CS_pins[1].spi_channel = &hspi4;
 	ADXRS290_CS_pins[2].spi_channel = &hspi4;
-	ADXRS290_CS_pins[3].spi_channel = &hspi1;
+	ADXRS290_CS_pins[3].spi_channel = &hspi4;
 
 	for (int channel = 0; channel < ADXRS290_COUNT; channel++)
 	{
